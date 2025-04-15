@@ -3,37 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <title>Sales Data Visualization Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    #view-selector { margin-bottom: 20px; padding: 5px; font-size: 16px; }
-    .chart-container { display: none; margin-top: 20px; }
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      padding-top: 40px;
+    }
+    .chart-container {
+      display: none;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
 
-  <h1>Sales Data Visualization Dashboard</h1>
 
-  <label for="view-selector">Select a View:</label>
-  <select id="view-selector" onchange="changeView()">
-    <option value="chart1">1. Donut Chart</option>
-    <option value="chart2">2. Scatter Plot</option>
-    <option value="chart3">3. Streamgraph</option>
-    <option value="chart4">4. Histogram with Mean</option>
-    <option value="chart5">5. Bar Chart by Item</option>
-    <option value="chart6">6. Monthly Trend by Rep</option>
-    <option value="multiview">7. Multiview Grid</option>
-  </select>
+  <div class="container">
+    <h1 class="text-center mb-5 text-primary">📊 Sales Data Visualization Dashboard</h1>
 
-  <div id="chart1" class="chart-container"></div>
-  <div id="chart2" class="chart-container"></div>
-  <div id="chart3" class="chart-container"></div>
-  <div id="chart4" class="chart-container"></div>
-  <div id="chart5" class="chart-container"></div>
-  <div id="chart6" class="chart-container"></div>
-  <div id="multiview" class="chart-container"></div>
+    <div class="mb-4 text-center">
+      <label for="view-selector" class="form-label fs-5">🔍 Select a Visualization:  </label>
+      <select id="view-selector" class="form-select w-auto d-inline-block" onchange="changeView()">
+        <option value="chart1">1. Donut Chart</option>
+        <option value="chart2">2. Scatter Plot</option>
+        <option value="chart3">3. Streamgraph</option>
+        <option value="chart4">4. Histogram with Mean</option>
+        <option value="chart5">5. Bar Chart by Item</option>
+        <option value="chart6">6. Monthly Trend by Rep</option>
+        <option value="multiview">7. Multiview Grid</option>
+      </select>
+    </div>
+
+    <div id="chart1" class="chart-container "></div>
+    <div id="chart2" class="chart-container "></div>
+    <div id="chart3" class="chart-container "></div>
+    <div id="chart4" class="chart-container"></div>
+    <div id="chart5" class="chart-container"></div>
+    <div id="chart6" class="chart-container"></div>
+    <div id="multiview" class="chart-container"></div>
+  </div>
 
   <script>
     function changeView() {
@@ -47,135 +65,294 @@
 
     // chart1 - Donut Chart
     vegaEmbed('#chart1', {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "width": 300,
-      "height": 300,
-      "data": { "url": dataURL, "format": { "type": "csv" } },
-      "mark": { "type": "arc", "innerRadius": 80, "outerRadius": 140 },
-      "encoding": {
-        "theta": { "field": "Total", "type": "quantitative", "aggregate": "sum" },
-        "color": { "field": "Rep", "type": "nominal" },
-        "tooltip": [
-          { "field": "Rep", "type": "nominal" },
-          { "field": "Total", "aggregate": "sum", "type": "quantitative" }
-        ]
-      },
-      "title": "Donut Chart: Total Sales by Sales Rep"
-    });
+          "description": "Donut chart showing total sales by each Rep.",
+          "width": 300,
+          "height": 300,
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "mark": {
+            "type": "arc",
+            "innerRadius": 80,
+            "outerRadius": 140
+          },
+          "encoding": {
+            "theta": {
+              "field": "Total",
+              "type": "quantitative",
+              "aggregate": "sum",
+              "title": "Total Sales"
+            },
+            "color": {
+              "field": "Rep",
+              "type": "nominal",
+              "legend": {
+                "title": "Sales Rep"
+              }
+            },
+            "tooltip": [
+              {"field": "Rep", "type": "nominal", "title": "Sales Rep"},
+              {"field": "Total", "aggregate": "sum", "type": "quantitative", "title": "Total Sales ($)"}
+            ]
+          },
+          "title": {
+            "text": "Donut Chart: Total Sales by Sales Rep",
+            "fontSize": 18,
+            "anchor": "middle",
+            "color": "#222"
+          },
+          "config": {
+            "view": {"stroke": "transparent"},
+            "arc": {"stroke": "#fff"},
+            "background": "#fff"
+          }
+        });
 
     // chart2 - Scatter Plot
     vegaEmbed('#chart2', {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "data": { "url": dataURL, "format": { "type": "csv" } },
-      "width": 300,
-      "height": 300,
-      "selection": {
-        "brush": { "type": "interval", "encodings": ["x", "y"] }
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "title": {
+    "text": "Units vs. Unit Cost: Highlighting Items by Sales Volume",
+    "fontSize": 14,
+    "anchor": "start"
+  },
+  "data": {
+    "url": "https://raw.githubusercontent.com/shubbot/DataVisualisation/refs/heads/main/HW_III.csv",
+    "format": {"type": "csv"},
+    "parse": {"OrderDate": "date:'%d-%m-%Y'", "Total": "number"}
+  },
+  "mark": {"type": "circle", "opacity": 0.7, "size": 100},
+  "encoding": {
+    "x": {
+      "field": "Units",
+      "type": "quantitative",
+      "title": "Units Sold",
+      "scale": {"domain": [0, 100]},
+      "axis": {"grid": true}
+    },
+    "y": {
+      "field": "Unit Cost",
+      "type": "quantitative",
+      "title": "Unit Cost ($)",
+      "scale": {"domain": [0, 300]},
+      "axis": {"grid": true}
+    },
+    "color": {
+      "condition": {
+        "selection": "brush",
+        "field": "Item",
+        "type": "nominal",
+        "scale": {"scheme": "dark2"},
+        "title": "Item"
       },
-      "mark": { "type": "point", "filled": true, "size": 100 },
-      "encoding": {
-        "x": { "field": "Units", "type": "quantitative" },
-        "y": { "field": "Unit Cost", "type": "quantitative" },
-        "color": {
-          "condition": {
-            "selection": "brush",
-            "field": "Item",
-            "type": "nominal"
-          },
-          "value": "lightgray"
-        }
-      },
-      "title": "Scatter Plot: Units vs Unit Cost"
-    });
+      "value": "lightgrey"
+    },
+    "size": {
+      "field": "Total",
+      "type": "quantitative",
+      "scale": {"range": [50, 300]},
+      "legend": {"title": "Total Sales ($)"}
+    },
+    "tooltip": [
+      {"field": "Item", "title": "Item"},
+      {"field": "Units", "title": "Units Sold"},
+      {"field": "Unit Cost", "title": "Unit Cost", "format": "$.2f"},
+      {"field": "Total", "title": "Total", "format": "$.2f"}
+    ]
+  },
+  "selection": {"brush": {"type": "interval", "encodings": ["x", "y"]}},
+  "width": 600,
+  "height": 400,
+  "background": "white",
+  "config": {"view": {"stroke": "transparent"}}
+}
+        );
 
     // chart3 - Streamgraph
     vegaEmbed('#chart3', {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "data": { "url": dataURL, "format": { "type": "csv" } },
-      "width": 300,
-      "height": 300,
-      "transform": [
-        { "calculate": "toDate(datum.OrderDate)", "as": "ParsedDate" }
-      ],
-      "mark": { "type": "area", "interpolate": "monotone" },
-      "encoding": {
-        "x": { "field": "ParsedDate", "type": "temporal" },
-        "y": { "field": "Total", "type": "quantitative", "stack": "center" },
-        "color": { "field": "Item", "type": "nominal" }
-      },
-      "title": "Streamgraph: Total Over Time"
-    });
+          "description": "Streamgraph showing how Total varied over time for each Item.",
+          "width": 300,
+          "height": 300,
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "transform": [
+            {
+              "calculate": "toDate(datum.OrderDate)",
+              "as": "ParsedDate"
+            }
+          ],
+          "mark": {
+            "type": "area",
+            "interpolate": "monotone"
+          },
+          "encoding": {
+            "x": {
+              "field": "ParsedDate",
+              "type": "temporal",
+              "title": "Order Date"
+            },
+            "y": {
+              "field": "Total",
+              "type": "quantitative",
+              "stack": "center",
+              "title": "Total Sales ($)"
+            },
+            "color": {
+              "field": "Item",
+              "type": "nominal",
+              "title": "Item Type"
+            },
+            "tooltip": [
+              {"field": "Item", "type": "nominal", "title": "Item"},
+              {"field": "OrderDate", "type": "nominal", "title": "Order Date"},
+              {"field": "Total", "type": "quantitative", "title": "Total ($)"}
+            ]
+          },
+          "title": {
+            "text": "Streamgraph: Sales Over Time by Item",
+            "anchor": "start",
+            "fontSize": 18
+          }
+        });
 
     // chart4 - Histogram
     vegaEmbed('#chart4', {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "width": 300,
-      "height": 300,
-      "layer": [
-        {
-          "data": { "url": dataURL, "format": { "type": "csv" } },
-          "mark": "bar",
-          "encoding": {
-            "x": { "field": "Units", "bin": true, "type": "quantitative" },
-            "y": { "aggregate": "count", "type": "quantitative" }
-          }
-        },
-        {
-          "data": { "url": dataURL, "format": { "type": "csv" } },
-          "transform": [
-            { "aggregate": [{ "op": "mean", "field": "Units", "as": "mean_units" }] }
-          ],
-          "mark": { "type": "rule", "color": "red", "strokeDash": [4, 4], "size": 2 },
-          "encoding": { "x": { "field": "mean_units", "type": "quantitative" } }
-        }
-      ],
-      "title": "Histogram of Units with Mean"
-    });
+          "width": 300,
+          "height": 300,
+          "title": {"text": "Histogram of Units with Mean", "anchor": "start", "fontSize": 18},
+          "layer": [
+            {
+              "data": {
+                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+                "format": {"type": "csv"}
+              },
+              "mark": "bar",
+              "encoding": {
+                "x": {"field": "Units", "bin": true, "type": "quantitative"},
+                "y": {"aggregate": "count", "type": "quantitative"}
+              }
+            },
+            {
+              "data": {
+                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+                "format": {"type": "csv"}
+              },
+              "transform": [
+                {
+                  "aggregate": [{"op": "mean", "field": "Units", "as": "mean_units"}]
+                }
+              ],
+              "mark": {
+                "type": "rule",
+                "color": "red",
+                "strokeDash": [4, 4],
+                "size": 2
+              },
+              "encoding": {
+                "x": {"field": "mean_units", "type": "quantitative"}
+              }
+            }
+          ]
+        });
 
     // chart5 - Bar Chart
     vegaEmbed('#chart5', {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "width": 300,
-      "height": 300,
-      "data": { "url": dataURL, "format": { "type": "csv" } },
-      "mark": "bar",
-      "encoding": {
-        "x": { "field": "Item", "type": "nominal", "axis": { "labelAngle": 0 } },
-        "y": { "aggregate": "sum", "field": "Total", "type": "quantitative" },
-        "color": { "field": "Item", "type": "nominal", "legend": null }
-      },
-      "title": "Total Sales by Item"
-    });
+          "width": 300,
+          "height": 300,
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "mark": {"type": "bar"},
+          "encoding": {
+            "x": {
+              "field": "Item",
+              "type": "nominal",
+              "axis": {"title": "Item", "labelAngle": 0}
+            },
+            "y": {
+              "aggregate": "sum",
+              "field": "Total",
+              "type": "quantitative",
+              "axis": {"title": "Total Sales ($)"}
+            },
+            "color": {
+              "field": "Item",
+              "type": "nominal",
+              "legend": null
+            }
+          },
+          "title": {"text": "Total Sales by Item", "anchor": "start", "fontSize": 18}
+        });
 
     // chart6 - Line Chart
     vegaEmbed('#chart6', {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-      "width": 300,
-      "height": 300,
-      "data": { "url": dataURL, "format": { "type": "csv" } },
-      "transform": [
-        { "calculate": "toDate(datum.OrderDate)", "as": "ParsedDate" },
-        { "timeUnit": "yearmonth", "field": "ParsedDate", "as": "YearMonth" },
-        { "impute": "Total", "groupby": ["Rep"], "key": "YearMonth", "value": 0 }
-      ],
-      "mark": { "type": "line", "point": true },
-      "encoding": {
-        "x": {
-          "field": "YearMonth",
-          "type": "temporal",
-          "axis": { "format": "%b %Y", "labelAngle": -40 }
-        },
-        "y": { "aggregate": "sum", "field": "Total", "type": "quantitative" },
-        "color": { "field": "Rep", "type": "nominal" }
-      },
-      "title": "Monthly Sales Trend by Rep"
-    });
+          "width": 300,
+          "height": 300,
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "transform": [
+            {
+              "calculate": "toDate(datum.OrderDate)",
+              "as": "ParsedDate"
+            },
+            {
+              "timeUnit": "yearmonth",
+              "field": "ParsedDate",
+              "as": "YearMonth"
+            },
+            {
+              "impute": "Total",
+              "groupby": ["Rep"],
+              "key": "YearMonth",
+              "value": 0
+            }
+          ],
+          "mark": {"type": "line", "point": true},
+          "encoding": {
+            "x": {
+              "field": "YearMonth",
+              "type": "temporal",
+              "title": "Order Month",
+              "axis": {"format": "%b %Y", "labelAngle": -40}
+            },
+            "y": {
+              "aggregate": "sum",
+              "field": "Total",
+              "type": "quantitative",
+              "title": "Total Sales ($)"
+            },
+            "color": {
+              "field": "Rep",
+              "type": "nominal",
+              "title": "Sales Rep"
+            },
+            "tooltip": [
+              {"field": "Rep", "type": "nominal", "title": "Sales Rep"},
+              {"field": "YearMonth", "type": "temporal", "title": "Month"},
+              {"field": "Total", "aggregate": "sum", "type": "quantitative", "title": "Total Sales ($)"}
+            ]
+          },
+          "title": {"text": "Monthly Sales Trend by Rep", "anchor": "start", "fontSize": 18}
+        });
 
     // multiview from user spec
     const multiSpec = /* pasted user JSON here */
     {
-      "$schema": "https://vega.github.io/schema/vega-lite/v5.json","hconcat": [
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "resolve": {
+        "scale": {
+          "color": "independent"
+        }
+      },
+      "hconcat": [
     {
+
       "vconcat": [
         {
           "description": "Scatter plot showing correlation between Units and Unit Cost with a rectangular brush to highlight items.",
