@@ -1,309 +1,468 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>Sales Data Visualization</title>
-    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <meta charset="UTF-8">
+  <title>Sales Data Visualization Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #view-selector { margin-bottom: 20px; padding: 5px; font-size: 16px; }
+    .chart-container { display: none; margin-top: 20px; }
+  </style>
 </head>
-
 <body>
-    <h1>Sales Dashboard</h1>
-    <div id="vis"></div>
 
-    <script>
-        const spec = {
-            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-            "hconcat": [
-                {
-                    "vconcat": [
-                        {
-                            "description": "Scatter plot showing correlation between Units and Unit Cost with a rectangular brush to highlight items.",
-                            "data": {
-                                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
-                                "format": { "type": "csv" }
-                            },
-                            "width": 300,
-                            "height": 300,
-                            "selection": {
-                                "brush": {
-                                    "type": "interval",
-                                    "encodings": ["x", "y"]
-                                }
-                            },
-                            "mark": {
-                                "type": "point",
-                                "filled": true,
-                                "size": 100
-                            },
-                            "encoding": {
-                                "x": {
-                                    "field": "Units",
-                                    "type": "quantitative",
-                                    "title": "Number of Units Sold",
-                                    "scale": { "zero": true },
-                                    "axis": { "grid": true, "labelAngle": 0 }
-                                },
-                                "y": {
-                                    "field": "Unit Cost",
-                                    "type": "quantitative",
-                                    "title": "Unit Cost (USD)",
-                                    "scale": { "zero": true },
-                                    "axis": { "grid": true }
-                                },
-                                "color": {
-                                    "condition": {
-                                        "selection": "brush",
-                                        "field": "Item",
-                                        "type": "nominal",
-                                        "legend": { "title": "Item" }
-                                    },
-                                    "value": "lightgray"
-                                },
-                                "tooltip": [
-                                    { "field": "Item", "type": "nominal", "title": "Item Name" },
-                                    { "field": "Units", "type": "quantitative", "title": "Units" },
-                                    { "field": "Unit Cost", "type": "quantitative", "title": "Unit Cost ($)" },
-                                    { "field": "Total", "type": "quantitative", "title": "Total Sales ($)" },
-                                    { "field": "Rep", "type": "nominal", "title": "Sales Rep" }
-                                ]
-                            },
-                            "title": {
-                                "text": "Correlation between Units and Unit Cost",
-                                "anchor": "start",
-                                "fontSize": 18
-                            }
-                        },
-                        {
-                            "description": "Donut chart showing total sales by each Rep.",
-                            "width": 300,
-                            "height": 300,
-                            "data": {
-                                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
-                                "format": { "type": "csv" }
-                            },
-                            "mark": {
-                                "type": "arc",
-                                "innerRadius": 80,
-                                "outerRadius": 140
-                            },
-                            "encoding": {
-                                "theta": {
-                                    "field": "Total",
-                                    "type": "quantitative",
-                                    "aggregate": "sum",
-                                    "title": "Total Sales"
-                                },
-                                "color": {
-                                    "field": "Rep",
-                                    "type": "nominal",
-                                    "legend": {
-                                        "title": "Sales Rep"
-                                    }
-                                },
-                                "tooltip": [
-                                    { "field": "Rep", "type": "nominal", "title": "Sales Rep" },
-                                    { "field": "Total", "aggregate": "sum", "type": "quantitative", "title": "Total Sales ($)" }
-                                ]
-                            },
-                            "title": {
-                                "text": "Donut Chart: Total Sales by Sales Rep",
-                                "fontSize": 18,
-                                "anchor": "middle",
-                                "color": "#222"
-                            },
-                            "config": {
-                                "view": { "stroke": "transparent" },
-                                "arc": { "stroke": "#fff" },
-                                "background": "#fff"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "vconcat": [
-                        {
-                            "description": "Streamgraph showing how Total varied over time for each Item.",
-                            "width": 300,
-                            "height": 300,
-                            "data": {
-                                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
-                                "format": { "type": "csv" }
-                            },
-                            "transform": [
-                                {
-                                    "calculate": "toDate(datum.OrderDate)",
-                                    "as": "ParsedDate"
-                                }
-                            ],
-                            "mark": {
-                                "type": "area",
-                                "interpolate": "monotone"
-                            },
-                            "encoding": {
-                                "x": {
-                                    "field": "ParsedDate",
-                                    "type": "temporal",
-                                    "title": "Order Date"
-                                },
-                                "y": {
-                                    "field": "Total",
-                                    "type": "quantitative",
-                                    "stack": "center",
-                                    "title": "Total Sales ($)"
-                                },
-                                "color": {
-                                    "field": "Item",
-                                    "type": "nominal",
-                                    "title": "Item Type"
-                                },
-                                "tooltip": [
-                                    { "field": "Item", "type": "nominal", "title": "Item" },
-                                    { "field": "OrderDate", "type": "nominal", "title": "Order Date" },
-                                    { "field": "Total", "type": "quantitative", "title": "Total ($)" }
-                                ]
-                            },
-                            "title": {
-                                "text": "Streamgraph: Sales Over Time by Item",
-                                "anchor": "start",
-                                "fontSize": 18
-                            }
-                        },
-                        {
-                            "width": 300,
-                            "height": 300,
-                            "title": { "text": "Histogram of Units with Mean", "anchor": "start", "fontSize": 18 },
-                            "layer": [
-                                {
-                                    "data": {
-                                        "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
-                                        "format": { "type": "csv" }
-                                    },
-                                    "mark": "bar",
-                                    "encoding": {
-                                        "x": { "field": "Units", "bin": true, "type": "quantitative" },
-                                        "y": { "aggregate": "count", "type": "quantitative" }
-                                    }
-                                },
-                                {
-                                    "data": {
-                                        "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
-                                        "format": { "type": "csv" }
-                                    },
-                                    "transform": [
-                                        {
-                                            "aggregate": [{ "op": "mean", "field": "Units", "as": "mean_units" }]
-                                        }
-                                    ],
-                                    "mark": {
-                                        "type": "rule",
-                                        "color": "red",
-                                        "strokeDash": [4, 4],
-                                        "size": 2
-                                    },
-                                    "encoding": {
-                                        "x": { "field": "mean_units", "type": "quantitative" }
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "vconcat": [
-                        {
-                            "width": 300,
-                            "height": 300,
-                            "data": {
-                                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
-                                "format": { "type": "csv" }
-                            },
-                            "mark": { "type": "bar" },
-                            "encoding": {
-                                "x": {
-                                    "field": "Item",
-                                    "type": "nominal",
-                                    "axis": { "title": "Item", "labelAngle": 0 }
-                                },
-                                "y": {
-                                    "aggregate": "sum",
-                                    "field": "Total",
-                                    "type": "quantitative",
-                                    "axis": { "title": "Total Sales ($)" }
-                                },
-                                "color": {
-                                    "field": "Item",
-                                    "type": "nominal",
-                                    "legend": null
-                                }
-                            },
-                            "title": { "text": "Total Sales by Item", "anchor": "start", "fontSize": 18 }
-                        },
-                        {
-                            "width": 300,
-                            "height": 300,
-                            "data": {
-                                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
-                                "format": { "type": "csv" }
-                            },
-                            "transform": [
-                                {
-                                    "calculate": "toDate(datum.OrderDate)",
-                                    "as": "ParsedDate"
-                                },
-                                {
-                                    "timeUnit": "yearmonth",
-                                    "field": "ParsedDate",
-                                    "as": "YearMonth"
-                                },
-                                {
-                                    "impute": "Total",
-                                    "groupby": ["Rep"],
-                                    "key": "YearMonth",
-                                    "value": 0
-                                }
-                            ],
-                            "mark": { "type": "line", "point": true },
-                            "encoding": {
-                                "x": {
-                                    "field": "YearMonth",
-                                    "type": "temporal",
-                                    "title": "Order Month",
-                                    "axis": { "format": "%b %Y", "labelAngle": -40 }
-                                },
-                                "y": {
-                                    "aggregate": "sum",
-                                    "field": "Total",
-                                    "type": "quantitative",
-                                    "title": "Total Sales ($)"
-                                },
-                                "color": {
-                                    "field": "Rep",
-                                    "type": "nominal",
-                                    "title": "Sales Rep"
-                                },
-                                "tooltip": [
-                                    { "field": "Rep", "type": "nominal", "title": "Sales Rep" },
-                                    { "field": "YearMonth", "type": "temporal", "title": "Month" },
-                                    { "field": "Total", "aggregate": "sum", "type": "quantitative", "title": "Total Sales ($)" }
-                                ]
-                            },
-                            "title": { "text": "Monthly Sales Trend by Rep", "anchor": "start", "fontSize": 18 }
-                        }
-                    ]
-                }
-            ],
-            "title": {
-                "text": "Multiview Visualization: 2x3 Layout of Sales Data",
-                "anchor": "start",
-                "fontSize": 22
+  <h1>Sales Data Visualization Dashboard</h1>
+
+  <label for="view-selector">Select a View:</label>
+  <select id="view-selector" onchange="changeView()">
+    <option value="chart1">1. Donut Chart</option>
+    <option value="chart2">2. Scatter Plot</option>
+    <option value="chart3">3. Streamgraph</option>
+    <option value="chart4">4. Histogram with Mean</option>
+    <option value="chart5">5. Bar Chart by Item</option>
+    <option value="chart6">6. Monthly Trend by Rep</option>
+    <option value="multiview">7. Multiview Grid</option>
+  </select>
+
+  <div id="chart1" class="chart-container"></div>
+  <div id="chart2" class="chart-container"></div>
+  <div id="chart3" class="chart-container"></div>
+  <div id="chart4" class="chart-container"></div>
+  <div id="chart5" class="chart-container"></div>
+  <div id="chart6" class="chart-container"></div>
+  <div id="multiview" class="chart-container"></div>
+
+  <script>
+    function changeView() {
+      const selected = document.getElementById('view-selector').value;
+      const charts = document.querySelectorAll('.chart-container');
+      charts.forEach(chart => chart.style.display = 'none');
+      document.getElementById(selected).style.display = 'block';
+    }
+
+    const dataURL = "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv";
+
+    // chart1 - Donut Chart
+    vegaEmbed('#chart1', {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 300,
+      "height": 300,
+      "data": { "url": dataURL, "format": { "type": "csv" } },
+      "mark": { "type": "arc", "innerRadius": 80, "outerRadius": 140 },
+      "encoding": {
+        "theta": { "field": "Total", "type": "quantitative", "aggregate": "sum" },
+        "color": { "field": "Rep", "type": "nominal" },
+        "tooltip": [
+          { "field": "Rep", "type": "nominal" },
+          { "field": "Total", "aggregate": "sum", "type": "quantitative" }
+        ]
+      },
+      "title": "Donut Chart: Total Sales by Sales Rep"
+    });
+
+    // chart2 - Scatter Plot
+    vegaEmbed('#chart2', {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "data": { "url": dataURL, "format": { "type": "csv" } },
+      "width": 300,
+      "height": 300,
+      "selection": {
+        "brush": { "type": "interval", "encodings": ["x", "y"] }
+      },
+      "mark": { "type": "point", "filled": true, "size": 100 },
+      "encoding": {
+        "x": { "field": "Units", "type": "quantitative" },
+        "y": { "field": "Unit Cost", "type": "quantitative" },
+        "color": {
+          "condition": {
+            "selection": "brush",
+            "field": "Item",
+            "type": "nominal"
+          },
+          "value": "lightgray"
+        }
+      },
+      "title": "Scatter Plot: Units vs Unit Cost"
+    });
+
+    // chart3 - Streamgraph
+    vegaEmbed('#chart3', {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "data": { "url": dataURL, "format": { "type": "csv" } },
+      "width": 300,
+      "height": 300,
+      "transform": [
+        { "calculate": "toDate(datum.OrderDate)", "as": "ParsedDate" }
+      ],
+      "mark": { "type": "area", "interpolate": "monotone" },
+      "encoding": {
+        "x": { "field": "ParsedDate", "type": "temporal" },
+        "y": { "field": "Total", "type": "quantitative", "stack": "center" },
+        "color": { "field": "Item", "type": "nominal" }
+      },
+      "title": "Streamgraph: Total Over Time"
+    });
+
+    // chart4 - Histogram
+    vegaEmbed('#chart4', {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 300,
+      "height": 300,
+      "layer": [
+        {
+          "data": { "url": dataURL, "format": { "type": "csv" } },
+          "mark": "bar",
+          "encoding": {
+            "x": { "field": "Units", "bin": true, "type": "quantitative" },
+            "y": { "aggregate": "count", "type": "quantitative" }
+          }
+        },
+        {
+          "data": { "url": dataURL, "format": { "type": "csv" } },
+          "transform": [
+            { "aggregate": [{ "op": "mean", "field": "Units", "as": "mean_units" }] }
+          ],
+          "mark": { "type": "rule", "color": "red", "strokeDash": [4, 4], "size": 2 },
+          "encoding": { "x": { "field": "mean_units", "type": "quantitative" } }
+        }
+      ],
+      "title": "Histogram of Units with Mean"
+    });
+
+    // chart5 - Bar Chart
+    vegaEmbed('#chart5', {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 300,
+      "height": 300,
+      "data": { "url": dataURL, "format": { "type": "csv" } },
+      "mark": "bar",
+      "encoding": {
+        "x": { "field": "Item", "type": "nominal", "axis": { "labelAngle": 0 } },
+        "y": { "aggregate": "sum", "field": "Total", "type": "quantitative" },
+        "color": { "field": "Item", "type": "nominal", "legend": null }
+      },
+      "title": "Total Sales by Item"
+    });
+
+    // chart6 - Line Chart
+    vegaEmbed('#chart6', {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 300,
+      "height": 300,
+      "data": { "url": dataURL, "format": { "type": "csv" } },
+      "transform": [
+        { "calculate": "toDate(datum.OrderDate)", "as": "ParsedDate" },
+        { "timeUnit": "yearmonth", "field": "ParsedDate", "as": "YearMonth" },
+        { "impute": "Total", "groupby": ["Rep"], "key": "YearMonth", "value": 0 }
+      ],
+      "mark": { "type": "line", "point": true },
+      "encoding": {
+        "x": {
+          "field": "YearMonth",
+          "type": "temporal",
+          "axis": { "format": "%b %Y", "labelAngle": -40 }
+        },
+        "y": { "aggregate": "sum", "field": "Total", "type": "quantitative" },
+        "color": { "field": "Rep", "type": "nominal" }
+      },
+      "title": "Monthly Sales Trend by Rep"
+    });
+
+    // multiview from user spec
+    const multiSpec = /* pasted user JSON here */
+    {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json","hconcat": [
+    {
+      "vconcat": [
+        {
+          "description": "Scatter plot showing correlation between Units and Unit Cost with a rectangular brush to highlight items.",
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "width": 300,
+          "height": 300,
+          "selection": {
+            "brush": {
+              "type": "interval",
+              "encodings": ["x", "y"]
             }
-        };
+          },
+          "mark": {
+            "type": "point",
+            "filled": true,
+            "size": 100
+          },
+          "encoding": {
+            "x": {
+              "field": "Units",
+              "type": "quantitative",
+              "title": "Number of Units Sold",
+              "scale": {"zero": true},
+              "axis": {"grid": true, "labelAngle": 0}
+            },
+            "y": {
+              "field": "Unit Cost",
+              "type": "quantitative",
+              "title": "Unit Cost (USD)",
+              "scale": {"zero": true},
+              "axis": {"grid": true}
+            },
+            "color": {
+              "condition": {
+                "selection": "brush",
+                "field": "Item",
+                "type": "nominal",
+                "legend": {"title": "Item"}
+              },
+              "value": "lightgray"
+            },
+            "tooltip": [
+              {"field": "Item", "type": "nominal", "title": "Item Name"},
+              {"field": "Units", "type": "quantitative", "title": "Units"},
+              {"field": "Unit Cost", "type": "quantitative", "title": "Unit Cost ($)"},
+              {"field": "Total", "type": "quantitative", "title": "Total Sales ($)"},
+              {"field": "Rep", "type": "nominal", "title": "Sales Rep"}
+            ]
+          },
+          "title": {
+            "text": "Correlation between Units and Unit Cost",
+            "anchor": "start",
+            "fontSize": 18
+          }
+        },
+        {
+          "description": "Donut chart showing total sales by each Rep.",
+          "width": 300,
+          "height": 300,
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "mark": {
+            "type": "arc",
+            "innerRadius": 80,
+            "outerRadius": 140
+          },
+          "encoding": {
+            "theta": {
+              "field": "Total",
+              "type": "quantitative",
+              "aggregate": "sum",
+              "title": "Total Sales"
+            },
+            "color": {
+              "field": "Rep",
+              "type": "nominal",
+              "legend": {
+                "title": "Sales Rep"
+              }
+            },
+            "tooltip": [
+              {"field": "Rep", "type": "nominal", "title": "Sales Rep"},
+              {"field": "Total", "aggregate": "sum", "type": "quantitative", "title": "Total Sales ($)"}
+            ]
+          },
+          "title": {
+            "text": "Donut Chart: Total Sales by Sales Rep",
+            "fontSize": 18,
+            "anchor": "middle",
+            "color": "#222"
+          },
+          "config": {
+            "view": {"stroke": "transparent"},
+            "arc": {"stroke": "#fff"},
+            "background": "#fff"
+          }
+        }
+      ]
+    },
+    {
+      "vconcat": [
+        {
+          "description": "Streamgraph showing how Total varied over time for each Item.",
+          "width": 300,
+          "height": 300,
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "transform": [
+            {
+              "calculate": "toDate(datum.OrderDate)",
+              "as": "ParsedDate"
+            }
+          ],
+          "mark": {
+            "type": "area",
+            "interpolate": "monotone"
+          },
+          "encoding": {
+            "x": {
+              "field": "ParsedDate",
+              "type": "temporal",
+              "title": "Order Date"
+            },
+            "y": {
+              "field": "Total",
+              "type": "quantitative",
+              "stack": "center",
+              "title": "Total Sales ($)"
+            },
+            "color": {
+              "field": "Item",
+              "type": "nominal",
+              "title": "Item Type"
+            },
+            "tooltip": [
+              {"field": "Item", "type": "nominal", "title": "Item"},
+              {"field": "OrderDate", "type": "nominal", "title": "Order Date"},
+              {"field": "Total", "type": "quantitative", "title": "Total ($)"}
+            ]
+          },
+          "title": {
+            "text": "Streamgraph: Sales Over Time by Item",
+            "anchor": "start",
+            "fontSize": 18
+          }
+        },
+        {
+          "width": 300,
+          "height": 300,
+          "title": {"text": "Histogram of Units with Mean", "anchor": "start", "fontSize": 18},
+          "layer": [
+            {
+              "data": {
+                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+                "format": {"type": "csv"}
+              },
+              "mark": "bar",
+              "encoding": {
+                "x": {"field": "Units", "bin": true, "type": "quantitative"},
+                "y": {"aggregate": "count", "type": "quantitative"}
+              }
+            },
+            {
+              "data": {
+                "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+                "format": {"type": "csv"}
+              },
+              "transform": [
+                {
+                  "aggregate": [{"op": "mean", "field": "Units", "as": "mean_units"}]
+                }
+              ],
+              "mark": {
+                "type": "rule",
+                "color": "red",
+                "strokeDash": [4, 4],
+                "size": 2
+              },
+              "encoding": {
+                "x": {"field": "mean_units", "type": "quantitative"}
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "vconcat": [
+        {
+          "width": 300,
+          "height": 300,
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "mark": {"type": "bar"},
+          "encoding": {
+            "x": {
+              "field": "Item",
+              "type": "nominal",
+              "axis": {"title": "Item", "labelAngle": 0}
+            },
+            "y": {
+              "aggregate": "sum",
+              "field": "Total",
+              "type": "quantitative",
+              "axis": {"title": "Total Sales ($)"}
+            },
+            "color": {
+              "field": "Item",
+              "type": "nominal",
+              "legend": null
+            }
+          },
+          "title": {"text": "Total Sales by Item", "anchor": "start", "fontSize": 18}
+        },
+        {
+          "width": 300,
+          "height": 300,
+          "data": {
+            "url": "https://raw.githubusercontent.com/Saurabhbalke/dataset/refs/heads/main/HW_III%20-%20SalesOrders.csv",
+            "format": {"type": "csv"}
+          },
+          "transform": [
+            {
+              "calculate": "toDate(datum.OrderDate)",
+              "as": "ParsedDate"
+            },
+            {
+              "timeUnit": "yearmonth",
+              "field": "ParsedDate",
+              "as": "YearMonth"
+            },
+            {
+              "impute": "Total",
+              "groupby": ["Rep"],
+              "key": "YearMonth",
+              "value": 0
+            }
+          ],
+          "mark": {"type": "line", "point": true},
+          "encoding": {
+            "x": {
+              "field": "YearMonth",
+              "type": "temporal",
+              "title": "Order Month",
+              "axis": {"format": "%b %Y", "labelAngle": -40}
+            },
+            "y": {
+              "aggregate": "sum",
+              "field": "Total",
+              "type": "quantitative",
+              "title": "Total Sales ($)"
+            },
+            "color": {
+              "field": "Rep",
+              "type": "nominal",
+              "title": "Sales Rep"
+            },
+            "tooltip": [
+              {"field": "Rep", "type": "nominal", "title": "Sales Rep"},
+              {"field": "YearMonth", "type": "temporal", "title": "Month"},
+              {"field": "Total", "aggregate": "sum", "type": "quantitative", "title": "Total Sales ($)"}
+            ]
+          },
+          "title": {"text": "Monthly Sales Trend by Rep", "anchor": "start", "fontSize": 18}
+        }
+      ]
+    }
+  ],
+      "title": {
+        "text": "Multiview Visualization: 2x3 Layout of Sales Data",
+        "anchor": "start",
+        "fontSize": 22
+      }
+    };
+    vegaEmbed('#multiview', multiSpec);
 
-        vegaEmbed('#vis', spec).then(console.log).catch(console.warn);
-    </script>
+    // default view
+    changeView();
+  </script>
 </body>
-
 </html>
